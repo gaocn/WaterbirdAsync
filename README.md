@@ -1,11 +1,9 @@
 #异步任务AsyncTask
----
     Ameliorative AsyncTask：真正可并发，均衡手机能力与开销，针对短时间大量并发有调控策略，可在子线程执行。
     SimpleTask：具备Ameliorative AsyncTask所有特性，简化了使用方法，仅设置一个泛型（结果类）即可。
     SafeTask：具备Ameliorative AsyncTask所有特性，但是各个环节是安全的，能捕获任何异常，并传递给开发者。
     CachedTask：具备Ameliorative AsyncTask所有特性，增加了对结果的缓存，可设置一个超时时间，只有在超时后才去异步执行，否则取缓存结果返回。
 #任务调度器TaskExecutor
----
 - 序列执行器，序列化执行异步任务；
 - 屏障执行器，允许多个任务并发执行，并且满足在多个任务都执行完成后，才执行屏障点的任务；
 - 延迟执行器，指定时间延迟后，执行异步任务；
