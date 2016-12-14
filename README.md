@@ -42,11 +42,11 @@ SERIAL_EXECUTOR 串行线程池(例如：同一时刻有两个任务要处理，
         3-2. 若线程数等于最大线程数，抛出异常，拒绝任务
 ###ThreadPoolExecutor默认实现
 ###CachedThreadPool
-    CachedThreadPool会创建一个缓存区，将初始化的线程缓存起来。会终止并且从缓存中移除已有60秒未被使用的线程。如果线程有可用的，就使用之前创建好的线程;如果线程没有可用的，就新创建线程。
-    1. 重用：缓存型池子，先查看池中有没有以前建立的线程，如果有，就reuse；如果没有，就建一个新的线程加入池中
-    2. 使用场景：缓存型池子通常用于执行一些生存期很短的异步型任务，因此在一些面向连接的daemon型SERVER中用得不多。
-    3. 超时：能reuse的线程，必须是timeout IDLE内的池中线程，缺省timeout是60s，超过这个IDLE时长，线程实例将被终止及移出池。
-    4. 结束：注意，放入CachedThreadPool的线程不必担心其结束，超过TIMEOUT不活动，其会自动被终止。
+CachedThreadPool会创建一个缓存区，将初始化的线程缓存起来。会终止并且从缓存中移除已有60秒未被使用的线程。如果线程有可用的，就使用之前创建好的线程;如果线程没有可用的，就新创建线程。
+1. 重用：缓存型池子，先查看池中有没有以前建立的线程，如果有，就reuse；如果没有，就建一个新的线程加入池中
+2. 使用场景：缓存型池子通常用于执行一些生存期很短的异步型任务，因此在一些面向连接的daemon型SERVER中用得不多。
+3. 超时：能reuse的线程，必须是timeout IDLE内的池中线程，缺省timeout是60s，超过这个IDLE时长，线程实例将被终止及移出池。
+4. 结束：注意，放入CachedThreadPool的线程不必担心其结束，超过TIMEOUT不活动，其会自动被终止。
 
 ```
  public static ExecutorService newCachedThreadPool() {
@@ -64,11 +64,11 @@ SERIAL_EXECUTOR 串行线程池(例如：同一时刻有两个任务要处理，
 
 ```
 ###FixedThreadPool
-    在FixedThreadPool中，有一个固定大小的池。如果当前需要执行的任务超过池大小，那么多出的任务处于等待状态，直到有空闲下来的线程执行任务，如果当前需要执行的任务小于池大小，空闲的线程也不会去销毁。
-    1. 重用：fixedThreadPool与cacheThreadPool差不多，也是能reuse就用，但不能随时建新的线程
-    2. 固定数目：其独特之处在于，任意时间点，最多只能有固定数目的活动线程存在，此时如果有新的线程要建立，只能放在另外的队列中等待，直到当前的线程中某个线程终止直接被移出池子
-    3. 超时：和cacheThreadPool不同，FixedThreadPool没有IDLE机制（可能也有，但既然文档没提，肯定非常长，类似依赖上层的TCP或UDP IDLE机制之类的），
-    4. 使用场景：所以FixedThreadPool多数针对一些很稳定很固定的正规并发线程，多用于服务器
+在FixedThreadPool中，有一个固定大小的池。如果当前需要执行的任务超过池大小，那么多出的任务处于等待状态，直到有空闲下来的线程执行任务，如果当前需要执行的任务小于池大小，空闲的线程也不会去销毁。
+1. 重用：fixedThreadPool与cacheThreadPool差不多，也是能reuse就用，但不能随时建新的线程
+2. 固定数目：其独特之处在于，任意时间点，最多只能有固定数目的活动线程存在，此时如果有新的线程要建立，只能放在另外的队列中等待，直到当前的线程中某个线程终止直接被移出池子
+3. 超时：和cacheThreadPool不同，FixedThreadPool没有IDLE机制（可能也有，但既然文档没提，肯定非常长，类似依赖上层的TCP或UDP IDLE机制之类的），
+4. 使用场景：所以FixedThreadPool多数针对一些很稳定很固定的正规并发线程，多用于服务器
 
 ```
 public static ExecutorService newFixedThreadPool(int nThreads) {
@@ -91,7 +91,7 @@ public static ExecutorService newFixedThreadPool(int nThreads) {
     2. cache池线程数支持0-Integer.MAX_VALUE(显然完全没考虑主机的资源承受能力），60秒IDLE;
 
 ####SingleThreadExecutor
-    SingleThreadExecutor得到的是一个单个的线程，这个线程会保证你的任务执行完成。<font color="red">如果当前线程意外终止，会创建一个新线程继续执行任务</font>，这和我们直接创建线程不同，也和newFixedThreadPool(1)不同。
+SingleThreadExecutor得到的是一个单个的线程，这个线程会保证你的任务执行完成。<font color="red">如果当前线程意外终止，会创建一个新线程继续执行任务</font>，这和我们直接创建线程不同，也和newFixedThreadPool(1)不同。
 ```
 public static ExecutorService newSingleThreadExecutor() {
      return new FinalizableDelegatedExecutorService
@@ -127,7 +127,7 @@ public static ExecutorService newSingleThreadExecutor() {
 
 ```
 ###ScheduledThreadPool
-    ScheduledThreadPool是一个固定大小的线程池，与FixedThreadPool类似，执行的任务是定时执行。
+ScheduledThreadPool是一个固定大小的线程池，与FixedThreadPool类似，执行的任务是定时执行。
 ```
 public static ScheduledExecutorService newScheduledThreadPool(
          int corePoolSize, ThreadFactory threadFactory) {
