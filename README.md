@@ -2,7 +2,7 @@ Android 中的异步任务常用的一种方式是：Handler + Thread 组合来�
 Android 为了简化操作，提供了 AsyncTask 类来实现异步任务，并且轻松实现子线程和主线程间的通信。AsyncTask主要有二个部分：一个是与主线各的交互，另一个就是线程的管理调度。
 AsyncTask 虽然提供了cancle( true ) 方法来停止任务，但是这个方法只是中断了这个线程，但是并不能真正意义上的停止任务，这也是很多人说 AsyncTask 的弊端。极容易造成内存溢出的。
 
-###三种间接结束任务的方式：
+###二种间接结束任务的方式：
 1. 判断标志位，类似Java中无法停止一个正在运行的线程，Android中的AsyncTask也是一样，为此需要设置一个标志位，并且在doInBackground中的关键步骤决定是都停止该任务；
 2. 使用Exception，从外部调用AsyncTask的cancel方法不能终止任务，同样调用一个线程的interrupt方法之后线程仍然运行，但是若该线程中调用过sleep或wait方法后，处于sleep或wait状态，则sleep或wait状态立即结束并且抛出InterruptException异常；因此若在AsyncTask的doInBackground方法中调用了sleep或wait方法，则在UI线程中调用任务实例的cancel方法后，sleep或wait立即结束并且抛出InterruptedException异常，但是如果捕获该异常的代码后面还有其他代码，则这些代码还会继续执行。
 ###AsyncTask串行处理任务和并行处理任务
