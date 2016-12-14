@@ -138,3 +138,17 @@ public static ScheduledExecutorService newScheduledThreadPool(
      return new ScheduledThreadPoolExecutor(corePoolSize);
  }
 ```
+###并行执行器使用的SynchronousQueue
+SynchronousQueue采用生产者-消费者模式(最多只生产一个产品)，特别之处是内部没有容器，一个生产者线程，当生产了产品(put)后，若没有消费者消费该产品，此生产线程必须阻塞，等待一个消费者线程调用take消费产品(消费者消费产品的过程称之为数据传递)，take操作会唤醒生产者继续生产下一个产品；这个过程称为**一次配对过程**
+SynchronousQueue内部并没有数据缓存空间，你不能调用peek()方法来看队列中是否有数据元素，因为数据元素只有当你试着取走的时候才可能存在，不取走而只想偷窥一下是不行的，当然遍历这个队列的操作也是不允许的。队列头元素是第一个排队要插入数据的线程，而不是要交换的数据。数据是在配对的生产者和消费者线程之间直接传递的，并不会将数据缓冲数据到队列中。类似现实生活中的"火把传递":一个火把传递地他人,需要2个人"触手可及"才行. 因为这种策略,最终导致队列中并没有一个真正的元素;
+适用场景：常用于一个productor多个consumer的场景；传递性设计，即一个线程中运行的对象要将某些信息、事件或任务传递给另一个线程中运行的对象，它必须与该线程同步!
+```
+    private static final BlockingQueue<Runnable> sPoolWorkQueue = new SynchronousQueue<Runnable>();
+
+	public static final ThreadPoolExecutor mCachedSerialExecutor = new ThreadPoolExecutor(CORE_POOL_SIZE,
+			MAXIMUM_POOL_SIZE, KEEP_ALIVE, TimeUnit.SECONDS, sPoolWorkQueue, sThreadFactory);
+```
+例子中，ThreadPoolExecutor使用SynchronousQueue队列以确保如果现有线程无法接收任务(offer是失败)，将会创建新的线程来执行。
+队列的两种策略：
+1. 公平模式FIFO，双重队列实现，可减少可变性并避免饥饿现象，但会降低吞吐量；
+2. 非公平模式LIFO，双重栈实现；
