@@ -72,6 +72,14 @@ public class TaskExecutor {
         };
         timer.schedule(timerTask, delay, period);
     }
+    /** 序列化执行器 */
+    public static OrderedTaskExecutor newOrderedTaskExecutor() {
+        return new OrderedTaskExecutor();
+    }
+    /**  带屏障的执行器 */
+    public static  CyclicBarrierExecutor newCyclicBarrierExecutor() {
+        return new CyclicBarrierExecutor();
+    }
 
     /**
      * 序列化执行器
