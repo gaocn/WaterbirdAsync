@@ -62,7 +62,7 @@ public class TaskExecutor {
      * @param delay  > 0   第一次延迟执行时间
      * @param period > 0   心跳间隔时间，即下一次执行的时间隔间
      */
-    public static void startTimerTask(final Runnable task, long delay, long period) {
+    public static Timer startTimerTask(final Runnable task, long delay, long period) {
         Timer timer = new Timer();
         TimerTask timerTask = new TimerTask() {
             @Override
@@ -71,6 +71,7 @@ public class TaskExecutor {
             }
         };
         timer.schedule(timerTask, delay, period);
+        return timer;
     }
     /** 序列化执行器 */
     public static OrderedTaskExecutor newOrderedTaskExecutor() {

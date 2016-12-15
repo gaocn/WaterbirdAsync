@@ -9,8 +9,8 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 
-import waterbird.space.async.Log;
 import waterbird.space.async.R;
+import waterbird.space.birdasync.Log;
 
 import static waterbird.space.async.R.id.container;
 

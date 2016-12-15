@@ -10,14 +10,14 @@ import java.util.Arrays;
 import java.util.Timer;
 import java.util.concurrent.TimeUnit;
 
-import waterbird.space.async.AsyncTask;
-import waterbird.space.async.Log;
 import waterbird.space.async.R;
-import waterbird.space.async.SafeTask;
-import waterbird.space.async.SimpleCachedTask;
-import waterbird.space.async.SimpleSafeTask;
-import waterbird.space.async.SimpleTask;
-import waterbird.space.async.TaskExecutor;
+import waterbird.space.birdasync.AsyncTask;
+import waterbird.space.birdasync.Log;
+import waterbird.space.birdasync.SafeAsyncTask;
+import waterbird.space.birdasync.SimleSafeAsyncTask;
+import waterbird.space.birdasync.SimpleAsyncTask;
+import waterbird.space.birdasync.SimpleCachedAsyncTask;
+import waterbird.space.birdasync.TaskExecutor;
 
 public class MainActivity extends BaseActivity {
     private static final String TAG = "MainActivity";
@@ -30,10 +30,6 @@ public class MainActivity extends BaseActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setSubTitile(getString(R.string.sub_title));
-
-
-
-        testOrderedTaskExecutor();
     }
 
     public void onDestroy() {
@@ -104,7 +100,7 @@ public class MainActivity extends BaseActivity {
                 testCyclicBarrierExecutor();
                 break;
             case 7:
-                SimpleTask<?> s1 = getTask(1);
+                SimpleAsyncTask<?> s1 = getTask(1);
                 TaskExecutor.startDelayedTask(s1, 2, TimeUnit.SECONDS);
                 break;
             case 8:
@@ -128,12 +124,11 @@ public class MainActivity extends BaseActivity {
 
     private void testCachedAsyncTask() {
         // 超时时间暂设置为10秒(实际可能时间比较长)：第一次无缓存，取自网络。
-        new SimpleCachedTask<User>(MainActivity.this,
+        new SimpleCachedAsyncTask<User>(MainActivity.this,
                 "getUserInfo", 10, TimeUnit.SECONDS) {
             @Override
-            protected User doConnectNetwork() {
-                // execute...!
-                Log.i(TAG, " 1 connect to network now..");
+            protected User retriveDataFromNetwork() throws Exception {
+                Log.d(TAG, " 1 connect to network now..");
                 return mockhttpGetUserInfo();
             }
         }.execute();
@@ -142,26 +137,30 @@ public class MainActivity extends BaseActivity {
         SystemClock.sleep(6000);
         Log.i(TAG, "sleep 6000ms, second call");
         // sleep 6s , 未超时，数据将取自本地缓存。
-        new SimpleCachedTask<User>(MainActivity.this,
+        new SimpleCachedAsyncTask<User>(MainActivity.this,
                 "getUserInfo", 10, TimeUnit.SECONDS) {
             @Override
-            protected User doConnectNetwork() {
-                // noooo execute...!
+            protected User retriveDataFromNetwork() throws Exception {
                 Log.i(TAG, " 2 connect to network now.. 你将看不到这行日志。因为未超时它不会被执行");
                 return mockhttpGetUserInfo();
             }
         }.execute();
+
         SystemClock.sleep(6000);
         Log.i(TAG, "sleep 6000ms again, third call");
         // sleep 12s , 已超时，数据将取自本地网络。
-        new SimpleCachedTask<User>(MainActivity.this,
+        new SimpleCachedAsyncTask<User>(MainActivity.this,
                 "getUserInfo", 10, TimeUnit.SECONDS) {
             @Override
-            protected User doConnectNetwork() {
-                // execute...!
+            protected User retriveDataFromNetwork() throws Exception {
                 Log.i(TAG, " 3 connect to network now..");
                 Log.i(TAG, " 3  取自互联网（虚拟）");
                 return mockhttpGetUserInfo();
+            }
+
+            @Override
+            protected void onPostExecuteSafely(User user, Exception e) throws Exception {
+                Log.i(TAG, " 3  取自互联网（虚拟）======执行完成 === 更新 UI");
             }
         }.execute();
     }
@@ -216,7 +215,7 @@ public class MainActivity extends BaseActivity {
     }
 
     private void testSimpleTask() {
-        SimpleTask<Integer> simple = new SimpleTask<Integer>() {
+        SimpleAsyncTask<Integer> simple = new SimpleAsyncTask<Integer>() {
 
             @Override
             protected Integer doInBackground() {
@@ -230,7 +229,7 @@ public class MainActivity extends BaseActivity {
         };
         simple.execute();
         // simple safe success
-        SimpleSafeTask<String> sst = new SimpleSafeTask<String>() {
+        SimleSafeAsyncTask<String> sst = new SimleSafeAsyncTask<String>() {
 
             @Override
             protected String doInBackgroundSafely() throws Exception {
@@ -247,7 +246,7 @@ public class MainActivity extends BaseActivity {
         sst.execute();
         Log.i("~~~~~You Will See A Lot of Exception Info ~~~~~~:");
         // simple safe, error in every step
-        SimpleSafeTask<String> sse = new SimpleSafeTask<String>() {
+        SimleSafeAsyncTask<String> sse = new SimleSafeAsyncTask<String>() {
 
             @Override
             protected String doInBackgroundSafely() throws Exception {
@@ -288,7 +287,7 @@ public class MainActivity extends BaseActivity {
     private void testSafeTask() {
         Log.i("~~~~~You Will See A Lot of Exception Info ~~~~~~:");
         // safe task, but make error in every step
-        SafeTask<Integer, Integer, String> se = new SafeTask<Integer, Integer, String>() {
+        SafeAsyncTask<Integer, Integer, String> se = new SafeAsyncTask<Integer, Integer, String>() {
 
             @Override
             protected String doInBackgroundSafely(Integer... params) {
@@ -333,7 +332,7 @@ public class MainActivity extends BaseActivity {
     }
 
     private void test500msCancel() {
-        SimpleTask<Integer> st = new SimpleTask<Integer>() {
+        SimpleAsyncTask<Integer> st = new SimpleAsyncTask<Integer>() {
 
             @Override
             protected Integer doInBackground() {
@@ -359,13 +358,12 @@ public class MainActivity extends BaseActivity {
         SystemClock.sleep(500);
         st.cancel(true);
     }
-
     private void testOrderedTaskExecutor() {
         // ordered task
-        SimpleTask<?> s1 = getTask(1);
-        SimpleTask<?> s2 = getTask(2);
+        SimpleAsyncTask<?> s1 = getTask(1);
+        SimpleAsyncTask<?> s2 = getTask(2);
         final long startTime = System.currentTimeMillis();
-        SimpleTask<?> lastTask = new SimpleTask<Void>() {
+        SimpleAsyncTask<?> lastTask = new SimpleAsyncTask<Void>() {
             @Override
             protected Void doInBackground() {
                 return null;
@@ -378,15 +376,15 @@ public class MainActivity extends BaseActivity {
             }
         };
         // order: 2-1-last ，按task2-task1-lastTask的顺序执行
-        TaskExecutor.newOrderedExecutor().put(s2).put(s1).put(lastTask).start();
+        TaskExecutor.newOrderedTaskExecutor().put(s2).put(s1).put(lastTask).start();
     }
 
     private void testCyclicBarrierExecutor() {
-        SimpleTask<?> task1 = getTask(1);
-        SimpleTask<?> task2 = getTask(2);
-        SimpleTask<?> task3 = getTask(3);
+        SimpleAsyncTask<?> task1 = getTask(1);
+        SimpleAsyncTask<?> task2 = getTask(2);
+        SimpleAsyncTask<?> task3 = getTask(3);
         final long startTime = System.currentTimeMillis();
-        SimpleTask<String> destTask = new SimpleTask<String>() {
+        SimpleAsyncTask<String> destTask = new SimpleAsyncTask<String>() {
             @Override
             protected String doInBackground() {
                 return "This is the destination. You can do anything you want.";
@@ -406,8 +404,8 @@ public class MainActivity extends BaseActivity {
         task2.cancel(true);
     }
 
-    private SimpleTask<Integer> getTask(final int id) {
-        SimpleTask<Integer> simple = new SimpleTask<Integer>() {
+    private SimpleAsyncTask<Integer> getTask(final int id) {
+        SimpleAsyncTask<Integer> simple = new SimpleAsyncTask<Integer>() {
 
             @Override
             protected Integer doInBackground() {
@@ -430,9 +428,8 @@ public class MainActivity extends BaseActivity {
         };
         return simple;
     }
-
     /************************************* UserInfo *****************************************************/
-    private User mockhttpGetUserInfo() {
+    public User mockhttpGetUserInfo() {
         User user = new User();
         user.api = "com.litesuits.get.user";
         user.result = new BaseResponse.Result(200, "OK");

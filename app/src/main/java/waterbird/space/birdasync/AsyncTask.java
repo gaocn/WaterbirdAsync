@@ -36,9 +36,6 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import waterbird.space.async.ArrayDequeCompat;
-import waterbird.space.async.Log;
-
 /**
  * see {@link android.os.AsyncTask}
  * <p><b>在系统基础上</b>
