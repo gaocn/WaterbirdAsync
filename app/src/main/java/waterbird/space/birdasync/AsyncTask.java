@@ -91,6 +91,7 @@ public abstract class AsyncTask<Params, Progress, Result> {
             消费者没拿走当前的产品，生产者是不能再给产品的。(生产者和消费者互相等待对方，握手，然后一起离开。)
 
         SynchronousQueue 它是一个对于元素来说空了才能存入，存在才能取出的队列，只保留一个元素在queue里;
+	http://stevex.blog.51cto.com/4300375/1287085/
      */
 	private static final BlockingQueue<Runnable> sPoolWorkQueue = new SynchronousQueue<Runnable>();
 	/**
